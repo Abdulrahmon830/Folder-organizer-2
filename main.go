@@ -7,33 +7,37 @@ import (
 	"path/filepath"
 )
 
-// checking for error
 func check(err error) {
 	if err != nil {
-		fmt.Println("Error Happened")
+		fmt.Printf("Error Happened %s \n", err)
 		os.Exit(1)
 	}
 }
 func main() {
-	//get the user to input the folder needed to organize
+	// Get the user imput to get folder needs to be organized
 	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Println("which folder do you want to organize?- ")
+	fmt.Println("Which folder do you want to organize? - ")
 	scanner.Scan()
 
 	targetFolder := scanner.Text()
 
-	//checking if the folder exists or not
+	// check the folder exists or not
 	_, err := os.Stat(targetFolder)
-	if err != nil {
-		fmt.Print("folder doesn't exist")
+	if os.IsNotExist(err) {
+		fmt.Println("Folder does not exist")
 	} else {
-		createDefaultFolder(targetFolder)
+		// create default folder such as Images, Music, Docs, Others, Videos
+		createDefaultFolders(targetFolder)
 
+		//Organize the folders
 		organizeFolder(targetFolder)
 	}
+
 }
-func createDefaultFolder(targetFolder string) {
-	defaultFolders := []string{"images", "videos", "musics", "docs", "others"}
+
+// function to create default folders such as images, Music, Docs, Others, Videos
+func createDefaultFolders(targetFolder string) {
+	defaultFolders := []string{"Images", "Music", "Docs", "Others", "Videos"}
 
 	for _, folder := range defaultFolders {
 		_, err := os.Stat(folder)
@@ -42,63 +46,61 @@ func createDefaultFolder(targetFolder string) {
 		}
 	}
 }
+
+// function to Oraganize folders
 func organizeFolder(targetFolder string) {
-	//read dir
+	// read the dir
 	filesAndFolders, err := os.ReadDir(targetFolder)
 	check(err)
 
-	//to track hw many files moved
+	// to track how many files moved
 	noOfFiles := 0
 
 	for _, filesAndFolder := range filesAndFolders {
-		//check files
+		// check for files
 		if !filesAndFolder.IsDir() {
-			filesInfo, err := filesAndFolder.Info()
+			fileInfo, err := filesAndFolder.Info()
 			check(err)
 
 			//get the file full path
-			oldPath := filepath.Join(targetFolder, filesInfo.Name())
+			oldPath := filepath.Join(targetFolder, fileInfo.Name())
 			fileExt := filepath.Ext(oldPath)
 
-			//switch casea to move files based on theri ext
+			// switch case to move files based on ext
 			switch fileExt {
 			case ".png", ".jpg", ".jpeg":
-				newPath := filepath.Join(targetFolder, "images", filesInfo.Name())
-				err := os.Rename(oldPath, newPath)
+				newPath := filepath.Join(targetFolder, "Images", fileInfo.Name())
+				err = os.Rename(oldPath, newPath)
 				check(err)
 				noOfFiles++
-
-			case ".mp4", ".mov", ".avi":
-				newPath := filepath.Join(targetFolder, "videos", filesInfo.Name())
-				err := os.Rename(oldPath, newPath)
+			case ".mp4", ".mov", ".avi", ".amv":
+				newPath := filepath.Join(targetFolder, "Videos", fileInfo.Name())
+				err = os.Rename(oldPath, newPath)
 				check(err)
 				noOfFiles++
-
-			case ".mp3", ".aac", ".wav":
-				newPath := filepath.Join(targetFolder, "musics", filesInfo.Name())
-				err := os.Rename(oldPath, newPath)
+			case ".mp3", ".wav", ".aac":
+				newPath := filepath.Join(targetFolder, "Musics", fileInfo.Name())
+				err = os.Rename(oldPath, newPath)
 				check(err)
 				noOfFiles++
-
-			case ".csv", ".docx", ".pdf", ".xlsx":
-				newPath := filepath.Join(targetFolder, "docs", filesInfo.Name())
-				err := os.Rename(oldPath, newPath)
+			case ".pdf", ".csv", ".docx", ".xlsx":
+				newPath := filepath.Join(targetFolder, "Docs", fileInfo.Name())
+				err = os.Rename(oldPath, newPath)
 				check(err)
 				noOfFiles++
-
 			default:
-				newPath := filepath.Join(targetFolder, "images", filesInfo.Name())
-				err := os.Rename(oldPath, newPath)
+				newPath := filepath.Join(targetFolder, "Others", fileInfo.Name())
+				err = os.Rename(oldPath, newPath)
 				check(err)
 				noOfFiles++
 			}
-
 		}
 	}
-	//print hw many files moved
+
+	// print how many files moved
 	if noOfFiles > 0 {
-		fmt.Printf("%v numbers of files moved\n", noOfFiles)
+		fmt.Printf("%v number of files moved\n", noOfFiles)
 	} else {
-		fmt.Print("No files moved")
+		fmt.Printf("No files moved")
 	}
 }
