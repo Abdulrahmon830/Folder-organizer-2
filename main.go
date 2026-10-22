@@ -40,7 +40,7 @@ func createDefaultFolders(targetFolder string) {
 	defaultFolders := []string{"Images", "Music", "Docs", "Others", "Videos"}
 
 	for _, folder := range defaultFolders {
-		_, err := os.Stat(folder)
+		_, err := os.Stat(filepath.Join(targetFolder, folder))
 		if os.IsNotExist(err) {
 			os.Mkdir(filepath.Join(targetFolder, folder), 0755)
 		}
